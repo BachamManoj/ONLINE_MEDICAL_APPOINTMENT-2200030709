@@ -14,7 +14,7 @@ public class HomeController {
     }
     
     @GetMapping("/appointment")
-    public String appointment() {
+    public String appointmentpage() {
         return "appointment";
     }
     
@@ -24,13 +24,29 @@ public class HomeController {
     }
     
     @GetMapping("/register")
-    public String registerpage() {
+    public String registerpagepage() {
         return "registration";
     }
     
     @GetMapping("/services")
-    public String services() {
+    public String servicespage() {
         return "services";
+    }
+    
+    @GetMapping("/about")
+    public String aboutpage() {
+        return "about";
+    }
+    
+    @GetMapping("/contact")
+    public String contactpage() {
+        return "contact";
+    }
+    
+    
+    @GetMapping("/doctorLogin")
+    public String doctorloginpage() {
+        return "Doctorlogin";
     }
 }
 

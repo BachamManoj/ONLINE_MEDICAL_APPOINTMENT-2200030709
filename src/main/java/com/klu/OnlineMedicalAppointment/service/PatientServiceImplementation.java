@@ -30,4 +30,19 @@ public class PatientServiceImplementation implements PatientService {
 		return patientRepository.checkPatientLogin(email, password);
 	}
 	
+	public void updatePatientProfile(Long id, Patient updatedPatient) {
+        Patient existingPatient = patientRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
+
+       
+        existingPatient.updateDetails(updatedPatient);
+        patientRepository.save(existingPatient);
+    }
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public Patient getImage(Long id) {
+		return patientRepository.getById(id);
+	}
+	
 }

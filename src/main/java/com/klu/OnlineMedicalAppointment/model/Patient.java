@@ -12,8 +12,19 @@ public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @Lob
+    private byte[] profileImage;
 
-    @NotBlank(message = "First name is required")
+    public byte[] getProfileImage() {
+		return profileImage;
+	}
+
+	public void setProfileImage(byte[] profileImage) {
+		this.profileImage = profileImage;
+	}
+
+	@NotBlank(message = "First name is required")
     @Size(max = 50, message = "First name should not exceed 50 characters")
     private String firstName;
 
@@ -58,8 +69,6 @@ public class Patient {
         this.password = password;
         this.address = address;
     }
-
-    // Getters and Setters
 
     public Long getId() {
         return id;
@@ -139,5 +148,29 @@ public class Patient {
 
     public void setAppointments(List<Appointment> appointments) {
         this.appointments = appointments;
+    }
+
+    public void updateDetails(Patient updatedPatient) {
+        if (updatedPatient.getFirstName() != null) {
+            this.firstName = updatedPatient.getFirstName();
+        }
+        if (updatedPatient.getLastName() != null) {
+            this.lastName = updatedPatient.getLastName();
+        }
+        if (updatedPatient.getDateOfBirth() != null) {
+            this.dateOfBirth = updatedPatient.getDateOfBirth();
+        }
+        if (updatedPatient.getGender() != null) {
+            this.gender = updatedPatient.getGender();
+        }
+        if (updatedPatient.getContactNumber() != null) {
+            this.contactNumber = updatedPatient.getContactNumber();
+        }
+        if (updatedPatient.getAddress() != null) {
+            this.address = updatedPatient.getAddress();
+        }
+        if (updatedPatient.getProfileImage() != null) {
+            this.profileImage = updatedPatient.getProfileImage();
+        }
     }
 }

@@ -1,9 +1,10 @@
 package com.klu.OnlineMedicalAppointment.model;
 
 import jakarta.persistence.*;
-import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "appointments")
@@ -38,7 +39,7 @@ public class Appointment {
         this.doctor = doctor;
         this.date = date;
         this.timeSlot = timeSlot;
-        this.isCompleted = false; // Ensure default value is false
+        this.isCompleted = false; 
     }
 
     public Long getId() {

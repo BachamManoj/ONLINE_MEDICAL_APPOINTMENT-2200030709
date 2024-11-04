@@ -77,7 +77,7 @@
     <%@ include file="home.jsp" %> <!-- Including the header from home.jsp -->
     
     <div class="container">
-        <h2>Login</h2>
+        <h2>Patient Login</h2>
         <div class="login-container">
             <form action="${pageContext.request.contextPath}/patientLogin" method="post">
                 <div class="form-group">
