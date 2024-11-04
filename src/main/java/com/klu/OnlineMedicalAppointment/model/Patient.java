@@ -24,30 +24,24 @@ public class Patient {
 		this.profileImage = profileImage;
 	}
 
-	@NotBlank(message = "First name is required")
+	
     @Size(max = 50, message = "First name should not exceed 50 characters")
     private String firstName;
 
-    @NotBlank(message = "Last name is required")
     @Size(max = 50, message = "Last name should not exceed 50 characters")
     private String lastName;
 
-    @NotNull(message = "Date of birth is required")
     @Past(message = "Date of birth must be a past date")
     private LocalDate dateOfBirth;
 
-    @NotBlank(message = "Gender is required")
     private String gender;
 
-    @NotBlank(message = "Contact number is required")
     @Pattern(regexp = "^\\d{10}$", message = "Contact number must be a valid 10-digit number")
     private String contactNumber;
 
-    @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
     private String email;
 
-    @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters long")
     private String password;
 

@@ -12,23 +12,18 @@ public class Doctor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Doctor's name is required")
     @Size(max = 50, message = "Doctor's name should not exceed 50 characters")
     private String name;
 
-    @NotBlank(message = "Specialization is required")
     @Size(max = 50, message = "Specialization should not exceed 50 characters")
     private String specialization;
 
-    @NotBlank(message = "Contact number is required")
     @Pattern(regexp = "^\\d{10}$", message = "Contact number must be a valid 10-digit number")
     private String contactNumber;
 
-    @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
     private String email;
     
-    @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters long")
     private String password;
 
