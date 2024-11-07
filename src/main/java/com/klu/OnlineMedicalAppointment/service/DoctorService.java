@@ -7,4 +7,5 @@ import com.klu.OnlineMedicalAppointment.model.Doctor;
 public interface DoctorService {
 	public Doctor checkDoctorLogin(String email,String password);
 	public List<Doctor> getBySpecialization(String specialization);
+	public Doctor finbById(Long id);
 }

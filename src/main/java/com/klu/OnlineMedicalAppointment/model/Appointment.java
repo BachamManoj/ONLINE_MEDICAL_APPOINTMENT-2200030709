@@ -3,8 +3,9 @@ package com.klu.OnlineMedicalAppointment.model;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
-
 import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
 @Table(name = "appointments")
@@ -14,17 +15,22 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonBackReference(value = "patient-appointments")
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
+    @JsonBackReference(value = "doctor-appointments") 
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "Date is required")
     private LocalDate date;
 
+    
     @NotNull(message = "Time slot is required")
     private LocalTime timeSlot;
 

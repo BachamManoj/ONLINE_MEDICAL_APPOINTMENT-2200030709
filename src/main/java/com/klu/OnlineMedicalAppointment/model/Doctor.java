@@ -2,6 +2,8 @@ package com.klu.OnlineMedicalAppointment.model;
 
 import jakarta.persistence.*;
 import javax.validation.constraints.*;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import java.util.List;
 
 @Entity
@@ -28,8 +30,8 @@ public class Doctor {
     private String password;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "doctor-appointments") 
     private List<Appointment> appointments;
-
     
     public Doctor() {}
 

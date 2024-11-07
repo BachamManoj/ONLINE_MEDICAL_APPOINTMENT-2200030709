@@ -2,6 +2,7 @@ package com.klu.OnlineMedicalAppointment.controller;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.klu.OnlineMedicalAppointment.model.Appointment;
+import com.klu.OnlineMedicalAppointment.model.Doctor;
 import com.klu.OnlineMedicalAppointment.model.Patient;
+import com.klu.OnlineMedicalAppointment.service.AppointmentService;
+import com.klu.OnlineMedicalAppointment.service.DoctorService;
 import com.klu.OnlineMedicalAppointment.service.PatientService;
 
 import jakarta.servlet.http.HttpSession;
@@ -25,10 +30,18 @@ import jakarta.servlet.http.HttpSession;
 @RestController
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class PatientController {
+	
+	@Autowired
+	private AppointmentService appointmentService;
 
     @Autowired
     private PatientService patientService;
+    
+    @Autowired
+    private DoctorService doctorService;
 
+    
+    
     @PostMapping(value = "/patientRegistration", consumes = {"multipart/form-data"})
     public ResponseEntity<String> registerPatient(
             @RequestParam("firstName") String firstName,
@@ -153,5 +166,28 @@ public class PatientController {
     }
 
     
+    @PostMapping("/getbyspecialty")
+    public ResponseEntity<List<Doctor>> findBySpecialization(@RequestBody String specialization) {
+        System.out.println("Received specialization: " + specialization); 
+        List<Doctor> doctors = doctorService.getBySpecialization(specialization);
+        
+        if (doctors.isEmpty()) {
+            return ResponseEntity.noContent().build(); 
+        }
+        return ResponseEntity.ok(doctors); 
+    }
+
+    
+    @PostMapping("/makeAppointment")
+    public ResponseEntity<String> makeDoctorAppointment(@RequestBody Appointment appointment) {
+		Appointment app = appointmentService.makeAppointment(appointment);
+			
+		if(app!=null)
+		{
+			return ResponseEntity.ok("appointment done!!");	
+		}
+		return ResponseEntity.ok("sorry no appointment done!!");	
+		
+	}
     
 }

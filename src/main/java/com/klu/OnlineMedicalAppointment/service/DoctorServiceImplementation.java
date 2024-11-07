@@ -25,4 +25,10 @@ public class DoctorServiceImplementation implements DoctorService{
 		return doctorRepository.findBySpecialization(specialization);
 	}
 
+	@SuppressWarnings("deprecation")
+	@Override
+	public Doctor finbById(Long id) {
+		return doctorRepository.getById(id);
+	}
+
 }
