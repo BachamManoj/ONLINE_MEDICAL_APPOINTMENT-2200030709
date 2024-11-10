@@ -2,13 +2,11 @@ package com.klu.OnlineMedicalAppointment.model;
 
 import jakarta.persistence.*;
 import javax.validation.constraints.*;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@Table(name = "patients")
 public class Patient {
 
     @Id
@@ -51,7 +49,7 @@ public class Patient {
     private String address;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference(value = "patient-appointments") // This should match the patient side
+    @JsonIgnore
     private List<Appointment> appointments;
 
 

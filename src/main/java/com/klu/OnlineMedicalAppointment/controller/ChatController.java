@@ -1,32 +1,34 @@
 package com.klu.OnlineMedicalAppointment.controller;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import com.klu.OnlineMedicalAppointment.model.Message;
 import com.klu.OnlineMedicalAppointment.repository.MessageRepository;
-
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Controller
 public class ChatController {
 
-    @Autowired
-    private MessageRepository messageRepository;
-
     private final SimpMessagingTemplate template;
+    private final MessageRepository messageRepository;
 
-    public ChatController(SimpMessagingTemplate template) {
+    @Autowired
+    public ChatController(SimpMessagingTemplate template, MessageRepository messageRepository) {
         this.template = template;
+        this.messageRepository = messageRepository;
     }
 
     @MessageMapping("/chat.sendMessage")
-    @SendTo("/topic/messages")
-    public Message sendMessage(Message message) {
-        messageRepository.save(message); 
-        template.convertAndSendToUser(message.getReceiver(), "/topic/messages", message);
-        return message;
+    public void sendMessage(Message message) {
+        messageRepository.save(message);
+
+        List<Message> updatedChatHistory = messageRepository.findChatHistory(message.getSender(), message.getReceiver());
+
+        template.convertAndSendToUser(message.getSender(), "/queue/history", updatedChatHistory);
+        template.convertAndSendToUser(message.getReceiver(), "/queue/history", updatedChatHistory);
     }
 }

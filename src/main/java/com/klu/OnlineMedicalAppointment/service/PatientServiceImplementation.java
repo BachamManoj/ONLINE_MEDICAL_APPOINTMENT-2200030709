@@ -44,5 +44,12 @@ public class PatientServiceImplementation implements PatientService {
 	public Patient getImage(Long id) {
 		return patientRepository.getById(id);
 	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public Patient getPatinetData(Long id) {
+		return patientRepository.getById(id);
+	}
+
 	
 }

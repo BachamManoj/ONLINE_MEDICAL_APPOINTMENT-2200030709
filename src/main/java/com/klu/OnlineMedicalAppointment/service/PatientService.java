@@ -8,4 +8,6 @@ public interface PatientService {
 	public Patient checkPatientLogin(String email,String password);
 	public void updatePatientProfile(Long id, Patient updatedPatient);
 	public Patient getImage(Long id);
+	public Patient getPatinetData(Long id);
+	
 }

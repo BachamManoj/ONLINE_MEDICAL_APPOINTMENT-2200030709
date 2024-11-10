@@ -2,12 +2,10 @@ package com.klu.OnlineMedicalAppointment.model;
 
 import jakarta.persistence.*;
 import javax.validation.constraints.*;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 
 @Entity
-@Table(name = "doctors")
 public class Doctor {
 
     @Id
@@ -30,16 +28,28 @@ public class Doctor {
     private String password;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference(value = "doctor-appointments") 
+    @JsonIgnore
     private List<Appointment> appointments;
     
-    public Doctor() {}
+    private Double fee;
+    
+    public Double getFee() {
+		return fee;
+	}
 
-    public Doctor(String name, String specialization, String contactNumber, String email) {
+	public void setFee(Double fee) {
+		this.fee = fee;
+	}
+
+	public Doctor() {}
+
+    public Doctor(String name, String specialization, String contactNumber, String email,Double fee) {
         this.name = name;
         this.specialization = specialization;
         this.contactNumber = contactNumber;
         this.email = email;
+        this.fee=fee;
+        
     }
 
     public Long getId() {

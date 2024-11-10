@@ -158,6 +158,19 @@ public class PatientController {
 		return ResponseEntity.ok().body(image);
     }
     
+    @GetMapping("/getappointments/{id}")
+    public ResponseEntity<List<Appointment>> getPatientAppointment(@PathVariable Long id)
+    {
+    	Patient patient=patientService.getImage(id);
+    	List<Appointment> appointments=appointmentService.getPatientAppointments(patient);
+    	if(appointments!=null)
+    	{
+    		return ResponseEntity.ok(appointments);
+    	}
+		return null;
+    	
+    }
+    
     
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpSession session) {
@@ -189,5 +202,19 @@ public class PatientController {
 		return ResponseEntity.ok("sorry no appointment done!!");	
 		
 	}
+    
+    @GetMapping("/getPatientDataById/{id}")
+    public ResponseEntity<Patient> getPatientData(@PathVariable Long id)
+    {
+    	Patient patient=patientService.getPatinetData(id);
+    	if(patient!=null)
+    	{
+    		return ResponseEntity.ok(patient);
+    	}
+		return null;
+    	
+    }
+    
+    
     
 }
