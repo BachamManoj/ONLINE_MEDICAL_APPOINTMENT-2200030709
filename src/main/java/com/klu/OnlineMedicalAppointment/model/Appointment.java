@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 public class Appointment {
@@ -24,25 +25,28 @@ public class Appointment {
     private Doctor doctor;
 
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "Asia/Kolkata")
     @NotNull(message = "Date is required")
     private LocalDate date;
 
     
     @NotNull(message = "Time slot is required")
-    private LocalTime timeSlot;
+    private LocalTime timeSlot; 
 
     @Column(nullable = false)
     private Boolean isCompleted = false;
+    
+    private String status;
    
     public Appointment() {}
 
-    public Appointment(Patient patient, Doctor doctor, LocalDate date, LocalTime timeSlot) {
+    public Appointment(Patient patient, Doctor doctor, LocalDate date, LocalTime timeSlot,String status) {
         this.patient = patient;
         this.doctor = doctor;
         this.date = date;
         this.timeSlot = timeSlot;
-        this.isCompleted = false; 
+        this.isCompleted = false;
+        this.setStatus(status);
     }
 
     public Long getId() {
@@ -88,8 +92,36 @@ public class Appointment {
     public Boolean getIsCompleted() {
         return isCompleted;
     }
-
-    public void setIsCompleted(Boolean isCompleted) {
+    
+    public void setIsCompleted(Boolean isCompleted)
+    {
         this.isCompleted = isCompleted;
+        if (isCompleted && this.payment != null) 
+        {
+            this.payment.setIsPaid(true);
+        }
     }
+    
+    @JsonIgnore
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
+    private Payment payment;
+
+    public Payment getPayment() 
+    { 
+    	return payment; 
+    }
+
+    public void setPayment(Payment payment) 
+    {
+    	this.payment = payment; 
+    }
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+    
 }

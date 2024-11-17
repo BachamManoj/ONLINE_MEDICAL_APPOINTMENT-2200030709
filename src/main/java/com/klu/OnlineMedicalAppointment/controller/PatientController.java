@@ -2,10 +2,11 @@ package com.klu.OnlineMedicalAppointment.controller;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-
+import java.time.LocalTime;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,13 +18,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
+import com.itextpdf.text.DocumentException;
 import com.klu.OnlineMedicalAppointment.model.Appointment;
 import com.klu.OnlineMedicalAppointment.model.Doctor;
 import com.klu.OnlineMedicalAppointment.model.Patient;
+import com.klu.OnlineMedicalAppointment.model.Payment;
 import com.klu.OnlineMedicalAppointment.service.AppointmentService;
 import com.klu.OnlineMedicalAppointment.service.DoctorService;
 import com.klu.OnlineMedicalAppointment.service.PatientService;
+import com.klu.OnlineMedicalAppointment.service.PaymentService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -40,7 +43,8 @@ public class PatientController {
     @Autowired
     private DoctorService doctorService;
 
-    
+    @Autowired
+    private PaymentService paymentService;
     
     @PostMapping(value = "/patientRegistration", consumes = {"multipart/form-data"})
     public ResponseEntity<String> registerPatient(
@@ -90,7 +94,7 @@ public class PatientController {
         String password = patientLoginData.get("password");
         Patient patient = patientService.checkPatientLogin(email, password);
 
-        if (patient.getPassword().equals(password) && patient.getEmail().equals(email)) {
+        if (patient!=null && patient.getPassword().equals(password) && patient.getEmail().equals(email)) {
             session.setAttribute("patient", patient);
             session.setAttribute("patientEmail", patient.getEmail()); 
             return ResponseEntity.ok(patient); 
@@ -194,9 +198,12 @@ public class PatientController {
     @PostMapping("/makeAppointment")
     public ResponseEntity<String> makeDoctorAppointment(@RequestBody Appointment appointment) {
 		Appointment app = appointmentService.makeAppointment(appointment);
-			
 		if(app!=null)
 		{
+			Payment payment=new Payment();
+			payment.setAppointment(appointment);
+			payment.setAmount(app.getDoctor().getFee());
+			paymentService.createPayment(payment);
 			return ResponseEntity.ok("appointment done!!");	
 		}
 		return ResponseEntity.ok("sorry no appointment done!!");	
@@ -215,6 +222,91 @@ public class PatientController {
     	
     }
     
+    @GetMapping("/getPatientBillings")
+    public ResponseEntity<List<Payment>> appointmentBilling(HttpSession session)
+    {
+    	Patient patient = (Patient) session.getAttribute("patient");
+    	List<Appointment> appointments=appointmentService.getPatientAppointments(patient);
+    	
+    	List<Long> incompleteAppointmentIds = appointments.stream().filter(appointment -> !appointment.getIsCompleted()).map(Appointment::getId).collect(Collectors.toList());
+    	
+    	List<Payment> payments = paymentService.getAppointmentDues(incompleteAppointmentIds);
+    	
+		return ResponseEntity.ok(payments);
+	}
     
+    
+    @GetMapping("/getDoctorFreeSlot/{id}/{date}")
+    public ResponseEntity<List<LocalTime>> getDoctorFreeSlot(@PathVariable Long id,@PathVariable LocalDate date) {
+        try {
+            
+            Doctor doctor = doctorService.finbById(id);
+            if (doctor == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Collections.emptyList()); 
+            }
+            List<Appointment> appointments = appointmentService.getDoctorAppointmentsByDate(doctor, date);
+            List<LocalTime> bookedSlots = appointments.stream().map(Appointment::getTimeSlot).collect(Collectors.toList());
+            return ResponseEntity.ok(bookedSlots);
+        } 
+        catch (Exception e) 
+        {
+          
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.emptyList());
+        }
+    }
+    
+    
+	@GetMapping("/getAlreadybookedDates/{id}")
+    public ResponseEntity<List<LocalDate>>getAlreadybookedDates(@PathVariable Long id)
+    {
+    	Patient patient=patientService.getImage(id);
+    	List<Appointment> appointments=appointmentService.getPatientAppointments(patient);
+    	List<LocalDate> bookedDates = new ArrayList<>();
+    	for(Appointment appointment:appointments)
+    	{
+    		bookedDates.add(appointment.getDate());
+    	}
+    	
+		return ResponseEntity.ok(bookedDates);
+    	
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    @GetMapping("/allAppointmentReports/{patientId}")
+    public ResponseEntity<byte[]> generateAppointmentReport(@PathVariable Long patientId) {
+        try {
+            byte[] pdfBytes = appointmentService.generateAppointmentReport(patientId);
+
+            if (pdfBytes == null || pdfBytes.length == 0) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);  // No content if PDF is empty
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);  // Content type for PDF
+            headers.setContentDispositionFormData("inline", "AppointmentReport.pdf");  // Force inline display
+            headers.setCacheControl("no-cache, no-store, must-revalidate");  // Prevent caching of the response
+            headers.setPragma("no-cache");  // For older browsers
+            headers.setExpires(0);  
+            
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+
+        } catch (DocumentException | IOException e) {
+            // Handle errors in PDF generation
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
+    }
     
 }

@@ -54,6 +54,13 @@
 		    <artifactId>hibernate-validator</artifactId>
 		    <version>6.0.13.Final</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.itextpdf/itextpdf -->
+		<dependency>
+		    <groupId>com.itextpdf</groupId>
+		    <artifactId>itextpdf</artifactId>
+		    <version>5.5.13.4</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -124,6 +131,18 @@
 		    <artifactId>stomp-websocket</artifactId>
 		    <version>2.3.4</version>
 		</dependency>
+		<dependency>
+		    <groupId>com.stripe</groupId>
+		    <artifactId>stripe-java</artifactId>
+		    <version>20.102.0</version> <!-- Check for latest version -->
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.razorpay/razorpay-java -->
+		<dependency>
+		    <groupId>com.razorpay</groupId>
+		    <artifactId>razorpay-java</artifactId>
+		    <version>1.4.8</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
