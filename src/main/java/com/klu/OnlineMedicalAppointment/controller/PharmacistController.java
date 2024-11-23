@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.klu.OnlineMedicalAppointment.model.Appointment;
 import com.klu.OnlineMedicalAppointment.model.EPrescription;
 import com.klu.OnlineMedicalAppointment.model.Medicine;
 import com.klu.OnlineMedicalAppointment.model.OrderMedicines;
@@ -66,6 +64,14 @@ public class PharmacistController {
 		orderMedicinesService.confirmOrder(id);
 		return ResponseEntity.ok("Accepted and updated Medicines");
 	}
+	
+	@GetMapping("/checkMedicinesAcceptOrder/{id}")
+	public ResponseEntity<List<EPrescription>> checkMedicines(@PathVariable Long id)
+	{
+		List<EPrescription> ePrescriptions=ePrescriptionService.findAppointment(id);
+		return ResponseEntity.ok(ePrescriptions);
+	}
+	
 
     @PostMapping("/registerPharmacist")
     public ResponseEntity<Pharmacist> registerPharmacist(@RequestBody Pharmacist pharmacist) {
@@ -112,5 +118,32 @@ public class PharmacistController {
     		return ResponseEntity.ok(payment.getAmount());
     	}
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    }
+    
+    @PostMapping("/updateStatusDispatched/{id}")
+    public String updateStatusDispatched(@PathVariable Long id)
+    {
+    	OrderMedicines orderMedicines=orderMedicinesService.findOrderMedicines(id);
+    	orderMedicines.setDispatched(true);
+    	orderMedicinesService.createOrder(orderMedicines);
+    	return "Order is Dispatched";
+    }
+    
+    @PostMapping("/updateStatusinTransit/{id}")
+    public String updateStatusinTransit(@PathVariable Long id)
+    {
+    	OrderMedicines orderMedicines=orderMedicinesService.findOrderMedicines(id);
+    	orderMedicines.setInTransit(true);
+    	orderMedicinesService.createOrder(orderMedicines);
+    	return "Order is Dispatched";
+    }
+    
+    @PostMapping("/updateStatusDelivered/{id}")
+    public String updateStatusDelivered(@PathVariable Long id)
+    {
+    	OrderMedicines orderMedicines=orderMedicinesService.findOrderMedicines(id);
+    	orderMedicines.setDelivered(true);
+    	orderMedicinesService.createOrder(orderMedicines);
+    	return "Order is Dispatched";
     }
 }

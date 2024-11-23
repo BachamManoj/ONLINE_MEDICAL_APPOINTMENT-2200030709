@@ -39,4 +39,17 @@ public class OrderMedicinesServiceImplementation implements OrderMedicinesServic
 		return orderMedicinesRepository.save(orderMedicines);
 	}
 
+	@Override
+	public OrderMedicines findOrderMedicines(Long id) {
+		return orderMedicinesRepository.findByid(id);
+	}
+
+	@Override
+	public OrderMedicines findOrderMedicinesByAppointment(Long id) {
+		// TODO Auto-generated method stub
+		return orderMedicinesRepository.findByAppointmentId(id);
+	}
+	
+	
+
 }

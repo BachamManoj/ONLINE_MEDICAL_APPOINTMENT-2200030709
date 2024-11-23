@@ -9,4 +9,6 @@ public interface OrderMedicinesService {
 	OrderMedicines confirmPayment(Long id);
 	List<OrderMedicines> getAllOrders();
 	OrderMedicines confirmOrder(Long id);
+	OrderMedicines findOrderMedicines(Long id);
+	OrderMedicines findOrderMedicinesByAppointment(Long id);
 }

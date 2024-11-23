@@ -204,6 +204,25 @@ public class PatientController {
     	
     }
     
+    @GetMapping("/getOrdersbyPatient")
+    public ResponseEntity<List<OrderMedicines>> getAllOrders(HttpSession session) 
+    {
+        Patient patient = (Patient) session.getAttribute("patient");
+        if (patient == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        List<Appointment> appointments = appointmentService.getPatientAppointments(patient);
+        List<OrderMedicines> orderMedicines = new ArrayList<>();
+        for (Appointment appointment : appointments) {
+            OrderMedicines order = orderMedicinesService.findOrderMedicinesByAppointment(appointment.getId());
+            if (order != null) {
+                orderMedicines.add(order);
+            }
+        }
+        return ResponseEntity.ok(orderMedicines);
+    }
+
     
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpSession session) {
