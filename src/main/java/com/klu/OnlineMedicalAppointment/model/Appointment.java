@@ -36,7 +36,22 @@ public class Appointment {
     @Column(nullable = false)
     private Boolean isCompleted = false;
     
-    private String status;
+    @Column(nullable = false)
+    private Boolean reportCompleted = false;
+    
+    private int rating;
+    
+    private String ratingDescription;
+    
+    public Boolean getReportCompleted() {
+		return reportCompleted;
+	}
+
+	public void setReportCompleted(Boolean reportCompleted) {
+		this.reportCompleted = reportCompleted;
+	}
+
+	private String status;
    
     public Appointment() {}
 
@@ -46,6 +61,7 @@ public class Appointment {
         this.date = date;
         this.timeSlot = timeSlot;
         this.isCompleted = false;
+        this.reportCompleted=false;
         this.setStatus(status);
     }
 
@@ -122,6 +138,22 @@ public class Appointment {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public int getRating() {
+		return rating;
+	}
+
+	public void setRating(int rating) {
+		this.rating = rating;
+	}
+
+	public String getRatingDescription() {
+		return ratingDescription;
+	}
+
+	public void setRatingDescription(String ratingDescription) {
+		this.ratingDescription = ratingDescription;
 	}
     
 }

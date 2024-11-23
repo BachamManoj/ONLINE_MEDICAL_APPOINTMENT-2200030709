@@ -11,8 +11,19 @@ public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @Lob
+    private byte[] profileImage;
 
-    @Size(max = 50, message = "Doctor's name should not exceed 50 characters")
+    public byte[] getProfileImage() {
+		return profileImage;
+	}
+
+	public void setProfileImage(byte[] profileImage) {
+		this.profileImage = profileImage;
+	}
+
+	@Size(max = 50, message = "Doctor's name should not exceed 50 characters")
     private String name;
 
     @Size(max = 50, message = "Specialization should not exceed 50 characters")
@@ -107,4 +118,26 @@ public class Doctor {
     public void setAppointments(List<Appointment> appointments) {
         this.appointments = appointments;
     }
+    
+    public void updateDetails(Doctor updatedDoctor) {
+        if (updatedDoctor.getName() != null) {
+            this.name = updatedDoctor.getName();
+        }
+        if (updatedDoctor.getFee() != null) {
+            this.fee = updatedDoctor.getFee();
+        }
+        if (updatedDoctor.getEmail() != null) {
+            this.email = updatedDoctor.getEmail();
+        }
+        if (updatedDoctor.getContactNumber() != null) {
+            this.contactNumber = updatedDoctor.getContactNumber();
+        }
+        if (updatedDoctor.getSpecialization() != null) {
+            this.specialization = updatedDoctor.getSpecialization();
+        }
+        if (updatedDoctor.getProfileImage() != null) {
+            this.profileImage = updatedDoctor.getProfileImage();
+        }
+    }
+    
 }

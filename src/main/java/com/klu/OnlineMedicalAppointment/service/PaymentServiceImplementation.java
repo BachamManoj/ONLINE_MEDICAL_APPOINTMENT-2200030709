@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.klu.OnlineMedicalAppointment.model.Appointment;
 import com.klu.OnlineMedicalAppointment.model.Payment;
 import com.klu.OnlineMedicalAppointment.repository.PaymentRepository;
 import com.razorpay.Order;
@@ -52,4 +53,30 @@ public class PaymentServiceImplementation implements PaymentService {
     public List<Payment> getAppointmentDues(List<Long> appointmentIds) {
         return paymentRepository.findByAppointmentIdIn(appointmentIds);
     }
+    
+    @Override
+    public List<Payment> getEprescriptionPaymentsByAppointmentIds(List<Long> appointmentIds) {
+        return paymentRepository.findEprescriptionPaymentsByAppointmentIds(appointmentIds);
+    }
+
+	@Override
+	public void deleteAppointment(Long paymentId) {
+		paymentRepository.deleteById(paymentId);
+		
+	}
+
+	@Override
+	public Payment findByAppointmentId(Long appointmentId) {
+		return paymentRepository.findByAppointmentId(appointmentId);
+	}
+	
+	@Override
+	public List<Payment> findByAppointmentIds(List<Appointment> appointmentIds) {
+		return paymentRepository.findPaymentsByAppointmentIdsAndType(appointmentIds);
+	}
+
+	@Override
+	public Payment getPrice(Long appointmentId) {
+		return paymentRepository.findPrice(appointmentId);
+	}
 }

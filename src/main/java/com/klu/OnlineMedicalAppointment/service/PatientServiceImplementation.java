@@ -32,9 +32,7 @@ public class PatientServiceImplementation implements PatientService {
 	
 	public void updatePatientProfile(Long id, Patient updatedPatient) {
         Patient existingPatient = patientRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
-
-       
+            .orElseThrow(() -> new IllegalArgumentException("Patient not found"));       
         existingPatient.updateDetails(updatedPatient);
         patientRepository.save(existingPatient);
     }

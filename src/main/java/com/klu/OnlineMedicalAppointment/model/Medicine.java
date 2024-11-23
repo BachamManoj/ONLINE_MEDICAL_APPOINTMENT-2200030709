@@ -13,18 +13,34 @@ public class Medicine {
     private int quantity;
     private double price;
     private String description;
+    
+    @Lob
+    private byte[] image;
+    
+    public byte[] getImage() {
+		return image;
+	}
+
+	public void setImage(byte[] image) {
+		this.image = image;
+	}
 
   
 
-    public Medicine(String name, int quantity, double price, String description) {
+    public Medicine(String name, int quantity, double price, String description,byte[] image) {
         this.name = name;
         this.quantity = quantity;
         this.price = price;
         this.description = description;
+        this.image=image;
     }
 
    
-    public Long getId() {
+    public Medicine() {
+		
+	}
+
+	public Long getId() {
         return id;
     }
 

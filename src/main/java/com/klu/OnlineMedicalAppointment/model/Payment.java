@@ -21,6 +21,8 @@ public class Payment {
     private String paymentMethod;
 
     private Boolean isPaid;
+    
+    private int type;
 
     public Payment() {}
 
@@ -79,6 +81,14 @@ public class Payment {
 
 	public void setIsPaid(Boolean isPaid) {
 		this.isPaid = isPaid;
+	}
+
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
 	}
 	
 }

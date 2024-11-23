@@ -68,7 +68,7 @@ public class PaymentController {
     public ResponseEntity<Object> getPaymentDetails(@PathVariable String paymentId) {
         String url = "https://api.razorpay.com/v1/payments/" + paymentId;
 
-        // Set up Authorization header
+        
         String auth = razorpayKey + ":" + razorpaySecret;
         String authHeader = "Basic " + Base64.getEncoder().encodeToString(auth.getBytes());
 

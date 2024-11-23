@@ -1,7 +1,9 @@
 package com.klu.OnlineMedicalAppointment.controller;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -10,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,15 +21,30 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import com.itextpdf.text.DocumentException;
+
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.klu.OnlineMedicalAppointment.model.Appointment;
 import com.klu.OnlineMedicalAppointment.model.Doctor;
+import com.klu.OnlineMedicalAppointment.model.EPrescription;
+import com.klu.OnlineMedicalAppointment.model.OrderMedicines;
 import com.klu.OnlineMedicalAppointment.model.Patient;
 import com.klu.OnlineMedicalAppointment.model.Payment;
+import com.klu.OnlineMedicalAppointment.model.Report;
 import com.klu.OnlineMedicalAppointment.service.AppointmentService;
 import com.klu.OnlineMedicalAppointment.service.DoctorService;
+import com.klu.OnlineMedicalAppointment.service.EPrescriptionService;
+import com.klu.OnlineMedicalAppointment.service.OrderMedicinesService;
 import com.klu.OnlineMedicalAppointment.service.PatientService;
 import com.klu.OnlineMedicalAppointment.service.PaymentService;
+import com.klu.OnlineMedicalAppointment.service.ReportService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -45,6 +63,17 @@ public class PatientController {
 
     @Autowired
     private PaymentService paymentService;
+    
+    @Autowired 
+    private ReportService reportService;
+    
+    @Autowired
+    private EPrescriptionService ePrescriptionService;
+    
+    @Autowired
+    private OrderMedicinesService orderMedicinesService;
+
+   
     
     @PostMapping(value = "/patientRegistration", consumes = {"multipart/form-data"})
     public ResponseEntity<String> registerPatient(
@@ -203,6 +232,7 @@ public class PatientController {
 			Payment payment=new Payment();
 			payment.setAppointment(appointment);
 			payment.setAmount(app.getDoctor().getFee());
+			payment.setType(0);
 			paymentService.createPayment(payment);
 			return ResponseEntity.ok("appointment done!!");	
 		}
@@ -228,12 +258,35 @@ public class PatientController {
     	Patient patient = (Patient) session.getAttribute("patient");
     	List<Appointment> appointments=appointmentService.getPatientAppointments(patient);
     	
-    	List<Long> incompleteAppointmentIds = appointments.stream().filter(appointment -> !appointment.getIsCompleted()).map(Appointment::getId).collect(Collectors.toList());
+    	List<Long> incompleteAppointmentIds = appointments.stream().map(Appointment::getId).collect(Collectors.toList());
     	
     	List<Payment> payments = paymentService.getAppointmentDues(incompleteAppointmentIds);
     	
-		return ResponseEntity.ok(payments);
+    	List<Payment> filteredPayments = payments.stream()
+    		    .filter(payment -> payment.getType() == 0)
+    		    .collect(Collectors.toList());
+
+		return ResponseEntity.ok(filteredPayments);
 	}
+    
+    
+    @GetMapping("/getPatientBillingsEprescription")
+    public ResponseEntity<List<Payment>> getEprescriptionBilling(HttpSession session) {
+        Patient patient = (Patient) session.getAttribute("patient");
+        if (patient == null) {
+            return ResponseEntity.status(401).build(); // Unauthorized
+        }      
+        List<Appointment> appointments = appointmentService.getPatientAppointments(patient);
+        List<Long> incompleteAppointmentIds = appointments.stream().map(Appointment::getId).collect(Collectors.toList());
+
+        if (incompleteAppointmentIds.isEmpty()) {
+            return ResponseEntity.ok(List.of());
+        }
+        List<Payment> ePrescriptionPayments = paymentService.getEprescriptionPaymentsByAppointmentIds(incompleteAppointmentIds);
+
+        return ResponseEntity.ok(ePrescriptionPayments);
+    }
+    
     
     
     @GetMapping("/getDoctorFreeSlot/{id}/{date}")
@@ -273,40 +326,189 @@ public class PatientController {
 		return ResponseEntity.ok(bookedDates);
     	
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    @GetMapping("/allAppointmentReports/{patientId}")
-    public ResponseEntity<byte[]> generateAppointmentReport(@PathVariable Long patientId) {
-        try {
-            byte[] pdfBytes = appointmentService.generateAppointmentReport(patientId);
-
-            if (pdfBytes == null || pdfBytes.length == 0) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);  // No content if PDF is empty
+	
+	
+	@PutMapping("/ratebyPatient/{appointmentId}")
+    public ResponseEntity<String> updateRating(@PathVariable Long appointmentId,@RequestBody Appointment ratingRequest) 
+	{
+        try 
+        {
+            if (ratingRequest.getRating() < 1 || ratingRequest.getRating() > 5) 
+            {
+                return ResponseEntity.status(400).body("Rating must be between 1 and 5");
             }
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);  // Content type for PDF
-            headers.setContentDispositionFormData("inline", "AppointmentReport.pdf");  // Force inline display
-            headers.setCacheControl("no-cache, no-store, must-revalidate");  // Prevent caching of the response
-            headers.setPragma("no-cache");  // For older browsers
-            headers.setExpires(0);  
-            
-            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+            appointmentService.updateRatingIfCompleted(appointmentId,ratingRequest.getRating(),ratingRequest.getRatingDescription());
 
-        } catch (DocumentException | IOException e) {
-            // Handle errors in PDF generation
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
+            return ResponseEntity.ok("Rating updated successfully");
+        }
+        catch (IllegalArgumentException e) 
+        {
+            return ResponseEntity.status(400).body("Appointment not completed, unable to update rating");
+        }
+        catch (Exception e) 
+        {
+            return ResponseEntity.status(500).body("Failed to update rating");
         }
     }
-    
+	
+	
+	@DeleteMapping("/cancleApointment/{appointmentId}")
+	public ResponseEntity<String> cancelAppointmentbyPatient(@PathVariable Long appointmentId)
+	{
+		Payment payment=paymentService.findByAppointmentId(appointmentId);
+		if(payment != null)
+			paymentService.deleteAppointment(payment.getId());
+		appointmentService.deleteAppointment(appointmentId);
+		return ResponseEntity.ok("Appointment cancled succesfully");	
+	}
+	
+	 @PostMapping("/create")
+	 public ResponseEntity<String> createOrder(@RequestBody OrderMedicines order) 
+	 {
+	  	order.setOrderDate(LocalDateTime.now());
+	    orderMedicinesService.createOrder(order);
+	    return ResponseEntity.ok("Order created successfully!");
+	 }
+	   
+	 @PostMapping("/confirmOrder/{id}")
+	 public ResponseEntity<String> confirmOrder(@PathVariable Long id)
+	 {
+	  	orderMedicinesService.confirmPayment(id);
+	 	return ResponseEntity.ok("Order confirmed successfully!");	
+	 }	
+	
+	
+	@GetMapping("/viewPatientMedicalReportbyPatient/{appointmentId}/{doctorId}")
+	public ResponseEntity<byte[]> viewPatientMedicalReport(@PathVariable Long appointmentId,@PathVariable Long doctorId, HttpSession session)
+	{
+	    Patient patient = (Patient) session.getAttribute("patient");
+	    if (patient == null)
+	    {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);  
+	    }
+
+	    try 
+	    {
+	        Optional<Appointment> appointmentOpt = appointmentService.findAppointment(appointmentId);
+	        if (!appointmentOpt.isPresent())
+	        {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  
+	        }
+	        Appointment appointment = appointmentOpt.get();
+
+	        if (!appointment.getDoctor().getId().equals(doctorId)) 
+	        {
+	            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);  
+	        }
+
+	        if (!appointment.getPatient().getId().equals(patient.getId())) 
+	        {
+	            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);  
+	        }
+
+	        Report report = reportService.getReportByAppointmentIdAndPatientId(appointmentId, patient.getId());
+	        if (report == null)
+	        {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Report not found
+	        }
+
+	        List<EPrescription> prescriptions = ePrescriptionService.getEPrescriptionsByAppointment(appointment);
+
+	        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+	        Document document = new Document();
+	        PdfWriter.getInstance(document, byteArrayOutputStream);
+	        document.open();
+
+	        Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD, BaseColor.BLUE);
+	        Paragraph title = new Paragraph("Medical Report", titleFont);
+	        title.setAlignment(Element.ALIGN_CENTER);
+	        document.add(title);
+
+	        document.add(new Paragraph("\n"));
+
+	        Font patientInfoFont = new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL, BaseColor.BLACK);
+	        Paragraph patientName = new Paragraph("Patient: " + report.getPatient().getFirstName() + " " + report.getPatient().getLastName(), patientInfoFont);
+	        Paragraph doctorName = new Paragraph("Doctor: " + report.getDoctor().getName(), patientInfoFont);
+	        Paragraph appointmentDate = new Paragraph("Appointment Date: " + report.getAppointment().getDate(), patientInfoFont);
+	        document.add(patientName);
+	        document.add(doctorName);
+	        document.add(appointmentDate);
+
+	        document.add(new Paragraph("\n"));
+
+	        Font descriptionFont = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL, BaseColor.DARK_GRAY);
+	        Paragraph description = new Paragraph("Report Description:", descriptionFont);
+	        description.setSpacingBefore(10);
+	        description.setSpacingAfter(10);
+	        document.add(description);
+
+	        Paragraph reportDescription = new Paragraph(report.getDescription(), descriptionFont);
+	        reportDescription.setIndentationLeft(20); 
+	        document.add(reportDescription);
+
+	        if (!prescriptions.isEmpty())
+	        {
+	            document.add(new Paragraph("\nEPrescriptions:", descriptionFont));
+	            PdfPTable prescriptionTable = new PdfPTable(3);
+	            prescriptionTable.setWidthPercentage(100); 
+
+	            Font tableHeaderFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.WHITE);
+	            PdfPCell header1 = new PdfPCell(new Phrase("Medicine Name", tableHeaderFont));
+	            header1.setBackgroundColor(BaseColor.BLUE);
+	            PdfPCell header2 = new PdfPCell(new Phrase("Description", tableHeaderFont));
+	            header2.setBackgroundColor(BaseColor.BLUE);
+	            PdfPCell header3 = new PdfPCell(new Phrase("Quantity", tableHeaderFont));
+	            header3.setBackgroundColor(BaseColor.BLUE);
+	            prescriptionTable.addCell(header1);
+	            prescriptionTable.addCell(header2);
+	            prescriptionTable.addCell(header3);
+
+	            for (EPrescription prescription : prescriptions) {
+	                prescriptionTable.addCell(prescription.getMedicineName());
+	                prescriptionTable.addCell(prescription.getDescription());
+	                prescriptionTable.addCell(String.valueOf(prescription.getQuantity()));
+	            }
+
+	            document.add(prescriptionTable);
+	        }
+
+	        PdfPTable table = new PdfPTable(2); // Two columns
+	        table.setWidthPercentage(100); // Table width in percentage
+
+	        PdfPCell header1 = new PdfPCell(new Phrase("Key"));
+	        header1.setBackgroundColor(BaseColor.BLUE);
+	        PdfPCell header2 = new PdfPCell(new Phrase("Value"));
+	        header2.setBackgroundColor(BaseColor.BLUE);
+	        table.addCell(header1);
+	        table.addCell(header2);
+
+	        
+	        table.addCell("Patient ID");
+	        table.addCell(report.getPatient().getId().toString());
+	        table.addCell("Appointment ID");
+	        table.addCell(report.getAppointment().getId().toString());
+
+	        document.add(table);
+
+	        document.close();
+
+	        byte[] pdfContent = byteArrayOutputStream.toByteArray();
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.add("Content-Type", "application/pdf");
+	        headers.add("Content-Disposition", "inline; filename=MedicalReport_" + patient.getId() + "_" + appointmentId + ".pdf");
+
+	        return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
+
+	    }
+	    catch (Exception e) 
+	    {
+	        e.printStackTrace(); 
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);  
+	    }
+	}
+
+
+	
 }
