@@ -61,6 +61,12 @@ public class DoctorServiceImplementation implements DoctorService{
 	@Override
 	public Doctor getImage(Long id) {
 		return doctorRepository.getById(id);
+	}
+
+	@Override
+	public List<Doctor> fetchAllDoctors() {
+		
+		return doctorRepository.findAll();
 	}	
 
 }

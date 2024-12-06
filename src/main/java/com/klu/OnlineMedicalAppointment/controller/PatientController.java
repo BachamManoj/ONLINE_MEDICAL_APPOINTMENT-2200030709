@@ -86,7 +86,10 @@ public class PatientController {
             @RequestParam("password") String password,
             @RequestParam("address") String address,
             @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) {
-
+    	
+    	if (patientService.checkByemailorContact(email,contactNumber)) {
+            return ResponseEntity.badRequest().body("Email or Contact already exists.");
+        }
         byte[] profileImageBytes = null;
         if (profileImage != null && !profileImage.isEmpty()) {
             try {
@@ -117,9 +120,21 @@ public class PatientController {
         return patientService.checkByemailorContact(email, contactNumber);
     }
 
+    @GetMapping("/patientLoginSession")
+    public ResponseEntity<Patient> checkSession(HttpSession session) {
+        Patient patientSession = (Patient) session.getAttribute("patient");
+        if (patientSession != null) {
+        	session.setMaxInactiveInterval(30*100);
+            return ResponseEntity.ok(patientSession);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    }
+    
     @PostMapping("/patientLogin")
     public ResponseEntity<Patient> login(@RequestBody Map<String, String> patientLoginData, HttpSession session) {
-        String email = patientLoginData.get("email");
+    	
+    	
+    	String email = patientLoginData.get("email");
         String password = patientLoginData.get("password");
         Patient patient = patientService.checkPatientLogin(email, password);
 
@@ -235,7 +250,7 @@ public class PatientController {
     public ResponseEntity<List<Doctor>> findBySpecialization(@RequestBody String specialization) {
         System.out.println("Received specialization: " + specialization); 
         List<Doctor> doctors = doctorService.getBySpecialization(specialization);
-        
+        System.out.println(doctors);
         if (doctors.isEmpty()) {
             return ResponseEntity.noContent().build(); 
         }

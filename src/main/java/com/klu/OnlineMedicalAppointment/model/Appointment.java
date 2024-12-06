@@ -43,6 +43,8 @@ public class Appointment {
     
     private String ratingDescription;
     
+    private String appointmentUrl;
+    
     public Boolean getReportCompleted() {
 		return reportCompleted;
 	}
@@ -154,6 +156,14 @@ public class Appointment {
 
 	public void setRatingDescription(String ratingDescription) {
 		this.ratingDescription = ratingDescription;
+	}
+
+	public String getAppointmentUrl() {
+		return appointmentUrl;
+	}
+
+	public void setAppointmentUrl(String appointmentUrl) {
+		this.appointmentUrl = appointmentUrl;
 	}
     
 }

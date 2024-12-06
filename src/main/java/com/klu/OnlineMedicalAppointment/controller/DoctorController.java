@@ -178,8 +178,26 @@ public class DoctorController {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating the profile.");
 	    }
 	}
-
 	
+	@GetMapping("/getAllDoctorsList")
+	public ResponseEntity<List<Doctor>> getAllDoctors()
+	{
+		return ResponseEntity.ok(doctorService.fetchAllDoctors());
+	}
+	
+	@PutMapping("/OnlineConferance")
+	public void provideUrl(@RequestParam String url,@RequestParam Long appointmentid)
+	{
+		Optional<Appointment> appointment=appointmentService.findAppointment(appointmentid);
+		if(appointment.isPresent())
+		{
+			Appointment appointment2=appointment.get();
+			appointment2.setAppointmentUrl(url);
+			appointment2.setStatus("VIRTUAL APP ✔");
+			appointment2.setIsCompleted(true);
+			appointmentService.makeAppointment(appointment2);
+		}
+	}
 	
 	@GetMapping("/viewPatientMedicalReport/{patientId}/{appointmentId}")
     public ResponseEntity<byte[]> viewPatientMedicalReport(@PathVariable Long patientId, @PathVariable Long appointmentId, HttpSession session) 
