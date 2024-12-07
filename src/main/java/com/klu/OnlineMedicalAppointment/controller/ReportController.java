@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "https://sdp2200030709.netlify.app/", allowCredentials = "true")
 public class ReportController {
 
 	@Autowired
