@@ -1,5 +1,7 @@
 package com.klu.OnlineMedicalAppointment.service;
 
+import java.util.List;
+
 import com.klu.OnlineMedicalAppointment.model.Patient;
 
 public interface PatientService {
@@ -9,5 +11,7 @@ public interface PatientService {
 	public void updatePatientProfile(Long id, Patient updatedPatient);
 	public Patient getImage(Long id);
 	public Patient getPatinetData(Long id);
-	
+	public Long getTotalPatientCount();
+	public List<Patient> getAllPatients();
+	public void deletePatient(Long Id);
 }

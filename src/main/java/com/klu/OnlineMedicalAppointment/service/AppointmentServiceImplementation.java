@@ -75,6 +75,10 @@ public class AppointmentServiceImplementation implements AppointmentService{
 	@Override
 	public void deleteAppointment(Long appointmentId) {
 		appointmentRepository.deleteById(appointmentId);
-		
+	}
+
+	@Override
+	public Long getTotalAppointmentCount() {
+		return appointmentRepository.getTotalAppointmentCount();
 	}
 }

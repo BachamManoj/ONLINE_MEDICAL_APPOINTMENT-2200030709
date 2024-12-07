@@ -19,7 +19,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>{
 	
 	Payment findByAppointmentId(Long appointmentId);
 	
-	@Query("SELECT p FROM Payment p WHERE p.appointment IN :appointmentIds AND p.type = 0")
+	@Query("SELECT p FROM Payment p WHERE p.appointment IN :appointmentIds")
 	List<Payment> findPaymentsByAppointmentIdsAndType(@Param("appointmentIds") List<Appointment> appointmentIds);
 
 	

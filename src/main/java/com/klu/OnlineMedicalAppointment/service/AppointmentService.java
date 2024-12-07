@@ -17,4 +17,5 @@ public interface AppointmentService {
 	Appointment updateReportCompleted(Long appointmentId); 
 	public void updateRatingIfCompleted(Long appointmentId, int rating, String ratingDescription);
 	public void deleteAppointment(Long appointmentId);
+	public Long getTotalAppointmentCount();
 }

@@ -1,5 +1,7 @@
 package com.klu.OnlineMedicalAppointment.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +49,22 @@ public class PatientServiceImplementation implements PatientService {
 	@Override
 	public Patient getPatinetData(Long id) {
 		return patientRepository.getById(id);
+	}
+
+	@Override
+	public Long getTotalPatientCount() {
+		return patientRepository.getTotalPatientCount();
+	}
+
+	@Override
+	public List<Patient> getAllPatients() {
+		return patientRepository.findAll();
+	}
+
+	@Override
+	public void deletePatient(Long Id) {
+		patientRepository.deleteById(Id);
+		
 	}
 
 	

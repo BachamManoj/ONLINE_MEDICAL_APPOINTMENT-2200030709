@@ -15,5 +15,6 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long>{
 	Doctor checkDoctorLogin(String email, String password);
 	List<Doctor> findBySpecialization(String specialization);
 	Optional<Doctor> findById(Long id);
-	
+	@Query("SELECT COUNT(p) FROM Doctor p")
+	long getTotalDoctorCount();
 }

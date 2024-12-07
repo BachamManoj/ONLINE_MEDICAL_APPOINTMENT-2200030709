@@ -124,7 +124,7 @@ public class PatientController {
     public ResponseEntity<Patient> checkSession(HttpSession session) {
         Patient patientSession = (Patient) session.getAttribute("patient");
         if (patientSession != null) {
-        	session.setMaxInactiveInterval(30*100);
+        	session.setMaxInactiveInterval(30*10);
             return ResponseEntity.ok(patientSession);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
@@ -223,11 +223,13 @@ public class PatientController {
     public ResponseEntity<List<OrderMedicines>> getAllOrders(HttpSession session) 
     {
         Patient patient = (Patient) session.getAttribute("patient");
+
         if (patient == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-
+       
         List<Appointment> appointments = appointmentService.getPatientAppointments(patient);
+
         List<OrderMedicines> orderMedicines = new ArrayList<>();
         for (Appointment appointment : appointments) {
             OrderMedicines order = orderMedicinesService.findOrderMedicinesByAppointment(appointment.getId());
@@ -263,11 +265,6 @@ public class PatientController {
 		Appointment app = appointmentService.makeAppointment(appointment);
 		if(app!=null)
 		{
-			Payment payment=new Payment();
-			payment.setAppointment(appointment);
-			payment.setAmount(app.getDoctor().getFee());
-			payment.setType(0);
-			paymentService.createPayment(payment);
 			return ResponseEntity.ok("appointment done!!");	
 		}
 		return ResponseEntity.ok("sorry no appointment done!!");	
@@ -308,7 +305,7 @@ public class PatientController {
     public ResponseEntity<List<Payment>> getEprescriptionBilling(HttpSession session) {
         Patient patient = (Patient) session.getAttribute("patient");
         if (patient == null) {
-            return ResponseEntity.status(401).build(); // Unauthorized
+            return ResponseEntity.status(401).build(); 
         }      
         List<Appointment> appointments = appointmentService.getPatientAppointments(patient);
         List<Long> incompleteAppointmentIds = appointments.stream().map(Appointment::getId).collect(Collectors.toList());

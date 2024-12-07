@@ -67,6 +67,18 @@ public class DoctorServiceImplementation implements DoctorService{
 	public List<Doctor> fetchAllDoctors() {
 		
 		return doctorRepository.findAll();
+	}
+
+	@Override
+	public Long getTotalDoctorCount() {
+		
+		return doctorRepository.getTotalDoctorCount();
+	}
+
+	@Override
+	public void deleteDoctor(Long id) {
+		doctorRepository.deleteById(id);
+		
 	}	
 
 }

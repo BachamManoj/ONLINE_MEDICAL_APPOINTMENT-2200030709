@@ -14,5 +14,6 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 	Patient checkPatientLogin(String email, String password);
 	Optional<Patient> findByEmail(String email);
 	Optional<Patient> findByContactNumber(String contactNumber);
-	
+	@Query("SELECT COUNT(p) FROM Patient p")
+	long getTotalPatientCount();
 }

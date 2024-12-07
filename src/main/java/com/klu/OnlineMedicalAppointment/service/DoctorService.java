@@ -13,4 +13,6 @@ public interface DoctorService {
 	public void saveDoctor(Doctor doctor);
 	public Doctor getImage(Long id);
 	public List<Doctor> fetchAllDoctors();
+	public Long getTotalDoctorCount();
+	public void deleteDoctor(Long id);
 }

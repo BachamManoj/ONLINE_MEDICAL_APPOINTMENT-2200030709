@@ -1,5 +1,7 @@
 package com.klu.OnlineMedicalAppointment.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,5 +23,17 @@ public class PharmacistServiceImplementation implements PharmacistService{
     public Pharmacist findPharmacistByEmail(String email) {
         return pharmacistRepository.findByEmail(email);
     }
+
+	@Override
+	public List<Pharmacist> getAllPharmacist() {
+		return pharmacistRepository.findAll();
+	}
+
+	@Override
+	public void deletPharmasist(Long id) {
+		pharmacistRepository.deleteById(id);	
+	}
+	
+	
 
 }
