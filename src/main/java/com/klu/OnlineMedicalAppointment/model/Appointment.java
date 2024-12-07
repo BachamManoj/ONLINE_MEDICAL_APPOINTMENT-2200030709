@@ -3,6 +3,9 @@ package com.klu.OnlineMedicalAppointment.model;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -45,7 +48,19 @@ public class Appointment {
     
     private String appointmentUrl;
     
-    public Boolean getReportCompleted() {
+    @JsonIgnore
+    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Payment> payments = new ArrayList<>();
+    
+    public List<Payment> getPayments() {
+		return payments;
+	}
+
+	public void setPayments(List<Payment> payments) {
+		this.payments = payments;
+	}
+
+	public Boolean getReportCompleted() {
 		return reportCompleted;
 	}
 

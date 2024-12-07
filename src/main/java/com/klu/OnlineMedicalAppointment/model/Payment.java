@@ -10,7 +10,7 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "appointment_id", nullable = false)
     private Appointment appointment;
 
