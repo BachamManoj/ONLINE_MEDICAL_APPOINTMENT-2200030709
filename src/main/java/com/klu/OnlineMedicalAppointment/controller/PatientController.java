@@ -154,7 +154,7 @@ public class PatientController {
             cookie.setHttpOnly(true); // Prevent JavaScript access to cookie
             cookie.setSecure(true); // Only send cookie over HTTPS
             cookie.setPath("/"); // Make the cookie accessible throughout the app
-            cookie.setDomain("yourfrontenddomain.com"); // Set the domain to your frontend domain (replace with actual)
+            cookie.setDomain("https://sdp-java.vercel.app"); // Set the domain to your frontend domain (replace with actual)
             cookie.setMaxAge(60 * 60); // Set cookie expiration time (1 hour)
 
             // Add cookie to the response
