@@ -26,7 +26,7 @@ import com.klu.OnlineMedicalAppointment.service.PharmacistService;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
-@CrossOrigin(origins = "https://sdp2200030709.netlify.app/", allowCredentials = "true")
+@CrossOrigin(origins = {"https://sdp-java.vercel.app", "https://sdp2200030709.netlify.app"}, allowCredentials = "true")
 public class PharmacistController {
 	@Autowired
     private PharmacistService pharmacistService;

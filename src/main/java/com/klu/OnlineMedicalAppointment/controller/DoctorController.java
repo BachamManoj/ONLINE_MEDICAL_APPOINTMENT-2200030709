@@ -36,7 +36,7 @@ import java.io.IOException;
 
 
 @RestController
-@CrossOrigin(origins = "https://sdp2200030709.netlify.app/", allowCredentials = "true")
+@CrossOrigin(origins = {"https://sdp-java.vercel.app", "https://sdp2200030709.netlify.app"}, allowCredentials = "true")
 public class DoctorController {
 	
 	@Autowired

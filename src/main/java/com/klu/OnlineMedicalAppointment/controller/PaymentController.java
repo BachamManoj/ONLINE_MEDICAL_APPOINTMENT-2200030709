@@ -11,9 +11,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Base64;
@@ -23,7 +20,7 @@ import com.razorpay.Order;
 import com.razorpay.RazorpayException;
 
 @RestController
-@CrossOrigin(origins = "https://sdp2200030709.netlify.app/", allowCredentials = "true")
+@CrossOrigin(origins = {"https://sdp-java.vercel.app", "https://sdp2200030709.netlify.app"}, allowCredentials = "true")
 public class PaymentController {
 
     @Autowired
