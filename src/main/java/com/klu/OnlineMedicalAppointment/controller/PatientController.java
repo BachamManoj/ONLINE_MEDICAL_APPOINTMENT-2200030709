@@ -46,9 +46,6 @@ import com.klu.OnlineMedicalAppointment.service.PatientService;
 import com.klu.OnlineMedicalAppointment.service.PaymentService;
 import com.klu.OnlineMedicalAppointment.service.ReportService;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
@@ -134,80 +131,31 @@ public class PatientController {
     }
     
     @PostMapping("/patientLogin")
-    public ResponseEntity<Patient> login(@RequestBody Map<String, String> patientLoginData, HttpSession session, HttpServletResponse response) {
-
-        // Extract email and password from the request body
-        String email = patientLoginData.get("email");
+    public ResponseEntity<Patient> login(@RequestBody Map<String, String> patientLoginData, HttpSession session) {
+    	
+    	
+    	String email = patientLoginData.get("email");
         String password = patientLoginData.get("password");
-
-        // Validate login credentials
         Patient patient = patientService.checkPatientLogin(email, password);
 
-        // Check if patient is found and credentials match
-        if (patient != null && patient.getPassword().equals(password) && patient.getEmail().equals(email)) {
-            
-            // Store patient object in session
+        if (patient!=null && patient.getPassword().equals(password) && patient.getEmail().equals(email)) {
             session.setAttribute("patient", patient);
-            session.setAttribute("patientEmail", patient.getEmail());
-
-            // Set session cookie for cross-site requests (if needed)
-            Cookie cookie = new Cookie("patientSessionId", session.getId());
-            cookie.setHttpOnly(true); // Prevent JavaScript access to the cookie
-            cookie.setSecure(true); // Only send cookie over HTTPS (make sure your site uses HTTPS)
-            cookie.setPath("/"); // Make the cookie accessible throughout the app
-            cookie.setDomain("netlify.com"); // Set the domain to your frontend domain (without https://)
-            cookie.setMaxAge(60 * 60); // Set cookie expiration time to 1 hour
-            response.addCookie(cookie); // Add the cookie to the response
-            
-
-            return ResponseEntity.ok(patient); // Respond with patient data if login is successful
+            session.setAttribute("patientEmail", patient.getEmail()); 
+            return ResponseEntity.ok(patient); 
         }
 
-        // Respond with unauthorized if login fails
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); 
     }
-
     
     @GetMapping("/getPatientDetails")
-    public ResponseEntity<Patient> getPatientDetails(HttpServletRequest request, HttpSession session) {
-        // Set session timeout to 10 minutes
-        session.setMaxInactiveInterval(30 * 10);
-
-        // Check for session ID in the cookies (to support cookie-based session management)
-        Cookie[] cookies = request.getCookies();
-        String sessionIdFromCookie = null;
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("patientSessionId".equals(cookie.getName())) {
-                    sessionIdFromCookie = cookie.getValue();
-                    break;
-                }
-            }
-        }
-
-        // If no session ID in the cookie, return unauthorized response
-        if (sessionIdFromCookie == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
-
-        // Validate the session ID from the cookie (this would require storing the session ID in a more persistent store if needed)
-        // In a typical scenario, you would have a session management service to verify the session ID validity
-        if (!session.getId().equals(sessionIdFromCookie)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
-
-        // Retrieve patient data from the session
+    public ResponseEntity<Patient> getPatientDetails(HttpSession session) {
+    	session.setMaxInactiveInterval(30*10);
         Patient patient = (Patient) session.getAttribute("patient");
-
         if (patient == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); 
         }
-
-        // Return patient details if session is valid
         return ResponseEntity.ok(patient);
     }
-
 
     @PutMapping(value = "/updatePatientProfile", consumes = "multipart/form-data")
     public ResponseEntity<String> updatePatientProfile(
