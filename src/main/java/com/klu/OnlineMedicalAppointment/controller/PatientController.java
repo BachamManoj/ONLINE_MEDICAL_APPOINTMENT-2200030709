@@ -46,6 +46,8 @@ import com.klu.OnlineMedicalAppointment.service.PatientService;
 import com.klu.OnlineMedicalAppointment.service.PaymentService;
 import com.klu.OnlineMedicalAppointment.service.ReportService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
@@ -121,14 +123,30 @@ public class PatientController {
     }
 
     @GetMapping("/patientLoginSession")
-    public ResponseEntity<Patient> checkSession(HttpSession session) {
-        Patient patientSession = (Patient) session.getAttribute("patient");
-        if (patientSession != null) {
-        	session.setMaxInactiveInterval(30*10);
-            return ResponseEntity.ok(patientSession);
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    public ResponseEntity<Patient> checkSession(HttpSession session, HttpServletResponse response) {
+    // Retrieve the patient session attribute
+    Patient patientSession = (Patient) session.getAttribute("patient");
+
+    if (patientSession != null) {
+        // Set session expiration timeout
+        session.setMaxInactiveInterval(30 * 10); // 30 minutes
+
+        // Create a cookie with the session ID
+        Cookie cookie = new Cookie("patientSessionId", session.getId());
+        cookie.setHttpOnly(true); // Prevent JavaScript access to the cookie
+        cookie.setSecure(true);  // Enable secure flag (HTTPS required)
+        cookie.setPath("/");     // Set the path for the cookie
+        cookie.setDomain("https://sdp-java.vercel.app"); // Update with your frontend domain
+        response.addCookie(cookie); // Add cookie to the response
+
+        // Return the patient session object
+        return ResponseEntity.ok(patientSession);
     }
+
+    // If no session exists, return unauthorized status
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+}
+
     
     @PostMapping("/patientLogin")
     public ResponseEntity<Patient> login(@RequestBody Map<String, String> patientLoginData, HttpSession session) {
