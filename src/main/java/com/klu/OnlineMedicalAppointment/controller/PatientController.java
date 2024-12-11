@@ -123,47 +123,50 @@ public class PatientController {
     }
 
     @GetMapping("/patientLoginSession")
-    public ResponseEntity<Patient> checkSession(HttpSession session, HttpServletResponse response) {
-    // Retrieve the patient session attribute
-    Patient patientSession = (Patient) session.getAttribute("patient");
-
-    if (patientSession != null) {
-        // Set session expiration timeout
-        session.setMaxInactiveInterval(30 * 10); // 30 minutes
-
-        // Create a cookie with the session ID
-        Cookie cookie = new Cookie("patientSessionId", session.getId());
-        cookie.setHttpOnly(true); // Prevent JavaScript access to the cookie
-        cookie.setSecure(true);  // Enable secure flag (HTTPS required)
-        cookie.setPath("/");     // Set the path for the cookie
-        cookie.setDomain("https://sdp-java.vercel.app"); // Update with your frontend domain
-        response.addCookie(cookie); // Add cookie to the response
-
-        // Return the patient session object
-        return ResponseEntity.ok(patientSession);
+    public ResponseEntity<Patient> checkSession(HttpSession session) {
+        Patient patientSession = (Patient) session.getAttribute("patient");
+        if (patientSession != null) {
+        	session.setMaxInactiveInterval(30*10);
+            return ResponseEntity.ok(patientSession);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
-
-    // If no session exists, return unauthorized status
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-}
-
     
     @PostMapping("/patientLogin")
-    public ResponseEntity<Patient> login(@RequestBody Map<String, String> patientLoginData, HttpSession session) {
-    	
-    	
-    	String email = patientLoginData.get("email");
+    public ResponseEntity<Patient> login(@RequestBody Map<String, String> patientLoginData, HttpSession session, HttpServletResponse response) {
+
+        // Extract email and password from the request body
+        String email = patientLoginData.get("email");
         String password = patientLoginData.get("password");
+
+        // Validate login credentials
         Patient patient = patientService.checkPatientLogin(email, password);
 
-        if (patient!=null && patient.getPassword().equals(password) && patient.getEmail().equals(email)) {
+        // Check if patient is found and credentials match
+        if (patient != null && patient.getPassword().equals(password) && patient.getEmail().equals(email)) {
+            
+            // Store patient object in session
             session.setAttribute("patient", patient);
-            session.setAttribute("patientEmail", patient.getEmail()); 
-            return ResponseEntity.ok(patient); 
+            session.setAttribute("patientEmail", patient.getEmail());
+
+            // Set session cookie for cross-site requests (if needed)
+            Cookie cookie = new Cookie("patientSessionId", session.getId());
+            cookie.setHttpOnly(true); // Prevent JavaScript access to cookie
+            cookie.setSecure(true); // Only send cookie over HTTPS
+            cookie.setPath("/"); // Make the cookie accessible throughout the app
+            cookie.setDomain("yourfrontenddomain.com"); // Set the domain to your frontend domain (replace with actual)
+            cookie.setMaxAge(60 * 60); // Set cookie expiration time (1 hour)
+
+            // Add cookie to the response
+            response.addCookie(cookie);
+
+            return ResponseEntity.ok(patient); // Respond with patient data if login is successful
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); 
+        // Respond with unauthorized if login fails
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
+
     
     @GetMapping("/getPatientDetails")
     public ResponseEntity<Patient> getPatientDetails(HttpSession session) {
