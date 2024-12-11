@@ -21,7 +21,6 @@ import com.klu.OnlineMedicalAppointment.model.Admin;
 import com.klu.OnlineMedicalAppointment.model.Doctor;
 import com.klu.OnlineMedicalAppointment.model.Patient;
 import com.klu.OnlineMedicalAppointment.model.Pharmacist;
-import com.klu.OnlineMedicalAppointment.repository.AdminRepository;
 import com.klu.OnlineMedicalAppointment.service.AdminService;
 import com.klu.OnlineMedicalAppointment.service.AppointmentService;
 import com.klu.OnlineMedicalAppointment.service.DoctorService;
@@ -29,7 +28,6 @@ import com.klu.OnlineMedicalAppointment.service.PatientService;
 import com.klu.OnlineMedicalAppointment.service.PharmacistService;
 
 import jakarta.servlet.http.HttpSession;
-import jakarta.websocket.server.PathParam;
 
 @RestController
 public class AdminController {
