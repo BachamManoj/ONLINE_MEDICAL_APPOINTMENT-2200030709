@@ -155,7 +155,7 @@ public class PatientController {
             cookie.setHttpOnly(true); // Prevent JavaScript access to the cookie
             cookie.setSecure(true); // Only send cookie over HTTPS (make sure your site uses HTTPS)
             cookie.setPath("/"); // Make the cookie accessible throughout the app
-            // Set the domain to your frontend domain (without https://)
+            cookie.setDomain("netlify.com"); // Set the domain to your frontend domain (without https://)
             cookie.setMaxAge(60 * 60); // Set cookie expiration time to 1 hour
             response.addCookie(cookie); // Add the cookie to the response
             
