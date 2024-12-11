@@ -47,6 +47,7 @@ import com.klu.OnlineMedicalAppointment.service.PaymentService;
 import com.klu.OnlineMedicalAppointment.service.ReportService;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
@@ -154,7 +155,7 @@ public class PatientController {
             cookie.setHttpOnly(true); // Prevent JavaScript access to cookie
             cookie.setSecure(true); // Only send cookie over HTTPS
             cookie.setPath("/"); // Make the cookie accessible throughout the app
-            cookie.setDomain("https://sdp-java.vercel.app"); // Set the domain to your frontend domain (replace with actual)
+            cookie.setDomain("https://sdp-java.vercel.app/patientlogin"); // Set the domain to your frontend domain (replace with actual)
             cookie.setMaxAge(60 * 60); // Set cookie expiration time (1 hour)
 
             // Add cookie to the response
@@ -169,14 +170,45 @@ public class PatientController {
 
     
     @GetMapping("/getPatientDetails")
-    public ResponseEntity<Patient> getPatientDetails(HttpSession session) {
-    	session.setMaxInactiveInterval(30*10);
-        Patient patient = (Patient) session.getAttribute("patient");
-        if (patient == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); 
+    public ResponseEntity<Patient> getPatientDetails(HttpServletRequest request, HttpSession session) {
+        // Set session timeout to 10 minutes
+        session.setMaxInactiveInterval(30 * 10);
+
+        // Check for session ID in the cookies (to support cookie-based session management)
+        Cookie[] cookies = request.getCookies();
+        String sessionIdFromCookie = null;
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("patientSessionId".equals(cookie.getName())) {
+                    sessionIdFromCookie = cookie.getValue();
+                    break;
+                }
+            }
         }
+
+        // If no session ID in the cookie, return unauthorized response
+        if (sessionIdFromCookie == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        // Validate the session ID from the cookie (this would require storing the session ID in a more persistent store if needed)
+        // In a typical scenario, you would have a session management service to verify the session ID validity
+        if (!session.getId().equals(sessionIdFromCookie)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        // Retrieve patient data from the session
+        Patient patient = (Patient) session.getAttribute("patient");
+
+        if (patient == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        // Return patient details if session is valid
         return ResponseEntity.ok(patient);
     }
+
 
     @PutMapping(value = "/updatePatientProfile", consumes = "multipart/form-data")
     public ResponseEntity<String> updatePatientProfile(
